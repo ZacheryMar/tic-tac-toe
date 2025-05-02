@@ -1,14 +1,14 @@
 {
-  "name": "Nombre de tu Aplicación",
-  "short_name": "Nombre Corto",
+  "name": "Tres Rayas Realista",
+  "short_name": "Triki",
   "icons": [
     {
-      "src": "img-icon/icono192.png",
+      "src": "icono192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "img-icon/icono512.png",
+      "src": "icono512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
