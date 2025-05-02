@@ -1,0 +1,20 @@
+{
+  "name": "Nombre de tu Aplicación",
+  "short_name": "Nombre Corto",
+  "icons": [
+    {
+      "src": "img-icon/icono192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "img-icon/icono512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#000000"
+}

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tres en Raya Realista</title>
+  <link rel="manifest" href="json/manifest.json">
+  <style>
+    body {
+      background-color: #222;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      background-color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #444;
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3em;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cell.x { color: #e74c3c; background-color: rgba(231, 76, 60, 0.2); }
+    .cell.o { color: #3498db; background-color: rgba(52, 152, 219, 0.2); }
+    .winner-message {
+      position: absolute;
+      top: 20px;
+      font-size: 2em;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      border-radius: 5px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .winner-message.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="winner-message"></div>
+  <div class="board">
+    <div class="cell" data-index="0"></div>
+    <div class="cell" data-index="1"></div>
+    <div class="cell" data-index="2"></div>
+    <div class="cell" data-index="3"></div>
+    <div class="cell" data-index="4"></div>
+    <div class="cell" data-index="5"></div>
+    <div class="cell" data-index="6"></div>
+    <div class="cell" data-index="7"></div>
+    <div class="cell" data-index="8"></div>
+  </div>
+
+  <script>
+    const cells = document.querySelectorAll('.cell');
+    const winnerMessage = document.querySelector('.winner-message');
+    let gameBoard = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+    let currentPlayer = 'x';
+
+    const winningCombinations = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+
+    function checkWinner(board) {
+      for (let [a, b, c] of winningCombinations) {
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          return board[a];
+        }
+      }
+      return board.includes('') ? null : 'tie';
+    }
+
+    function renderBoard() {
+      gameBoard.forEach((val, i) => {
+        cells[i].textContent = val;
+        cells[i].className = 'cell';
+        if (val) cells[i].classList.add(val);
+      });
+    }
+
+    function handleClick(e) {
+      const index = e.target.dataset.index;
+      if (gameBoard[index] !== '' || !gameActive || currentPlayer !== 'x') return;
+      gameBoard[index] = 'x';
+      currentPlayer = 'o';
+      renderBoard();
+      checkGameStatus();
+      if (gameActive) setTimeout(computerPlay, 500);
+    }
+
+    function computerPlay() {
+      let bestMove = minimax(gameBoard, 'o').index;
+      gameBoard[bestMove] = 'o';
+      currentPlayer = 'x';
+      renderBoard();
+      checkGameStatus();
+    }
+
+    function checkGameStatus() {
+      const result = checkWinner(gameBoard);
+      if (result) {
+        gameActive = false;
+        winnerMessage.textContent = result === 'tie' ? '¡Empate!' : `${result.toUpperCase()} gana!`;
+        winnerMessage.classList.add('show');
+      }
+    }
+
+    function minimax(newBoard, player) {
+      const availSpots = newBoard.map((val, idx) => val === '' ? idx : null).filter(v => v !== null);
+      const winner = checkWinner(newBoard);
+      if (winner === 'x') return { score: -10 };
+      if (winner === 'o') return { score: 10 };
+      if (winner === 'tie') return { score: 0 };
+
+      const moves = [];
+      for (let i of availSpots) {
+        const move = { index: i };
+        newBoard[i] = player;
+        const result = minimax(newBoard, player === 'o' ? 'x' : 'o');
+        move.score = result.score;
+        newBoard[i] = '';
+        moves.push(move);
+      }
+
+      let bestMove;
+      if (player === 'o') {
+        let bestScore = -Infinity;
+        for (let i = 0; i < moves.length; i++) {
+          if (moves[i].score > bestScore) {
+            bestScore = moves[i].score;
+            bestMove = i;
+          }
+        }
+      } else {
+        let bestScore = Infinity;
+        for (let i = 0; i < moves.length; i++) {
+          if (moves[i].score < bestScore) {
+            bestScore = moves[i].score;
+            bestMove = i;
+          }
+        }
+      }
+
+      return moves[bestMove];
+    }
+
+    cells.forEach(cell => cell.addEventListener('click', handleClick));
+    
+    </script>
+    <!-- Script para service worker -->
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then((registration) => {
+            console.log('Service Worker registrado con éxito:', registration);
+          })
+          .catch((error) => {
+            console.log('Error al registrar el Service Worker:', error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
